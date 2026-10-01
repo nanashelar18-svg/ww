@@ -17,6 +17,16 @@ let dbState = {
 // Auto-load on startup
 function loadDb() {
   try {
+    const bundled = require('../../nexus-db.json');
+    if (bundled && bundled.users) {
+      dbState = JSON.parse(JSON.stringify(bundled));
+      return;
+    }
+  } catch (e) {
+    // Fallback to fs read below
+  }
+
+  try {
     if (fs.existsSync(dbFilePath)) {
       const raw = fs.readFileSync(dbFilePath, 'utf8');
       dbState = JSON.parse(raw);
@@ -45,7 +55,7 @@ const db = {
 
   // Table operations
   users: {
-    find: (predicate) => dbState.users.filter(predicate),
+    find: (predicate = () => true) => dbState.users.filter(predicate),
     findOne: (predicate) => dbState.users.find(predicate) || null,
     insert: (data) => {
       const id = dbState.users.length ? Math.max(...dbState.users.map(u => u.id || 0)) + 1 : 1;

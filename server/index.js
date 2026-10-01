@@ -42,10 +42,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal Server Error', error: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 NexusAI Enterprise Server active on http://localhost:${PORT}`);
-  console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
-  console.log(`🔑 AI Key Configured: ${Boolean(process.env.GEMINI_API_KEY)}`);
-  console.log(`====================================================`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`🚀 NexusAI Enterprise Server active on http://localhost:${PORT}`);
+    console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
+    console.log(`🔑 AI Key Configured: ${Boolean(process.env.GEMINI_API_KEY)}`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = app;
+
