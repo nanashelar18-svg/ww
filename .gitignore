@@ -1,4 +1,4 @@
-﻿# Environment variables
+# Environment variables
 .env
 *.env
 server/.env
@@ -7,3 +7,7 @@ client/.env
 # Dependencies
 node_modules/
 **/node_modules/
+
+# Build outputs
+dist/
+client/dist/

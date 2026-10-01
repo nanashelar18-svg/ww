@@ -1,17 +1,10 @@
 {
-  "name": "web-auth-presentation",
+  "name": "nexus-ai-platform",
   "version": "1.0.0",
-  "description": "5-Minute Interactive Presentation on Web Authentication Architecture",
-  "main": "index.html",
+  "private": true,
+  "description": "Enterprise AI Cross-Department Operations & Knowledge Platform",
   "scripts": {
-    "start": "npx -y serve . -l 3000"
-  },
-  "keywords": [
-    "presentation",
-    "authentication",
-    "security",
-    "slides"
-  ],
-  "author": "",
-  "license": "MIT"
+    "build": "cd client && npm install && npm run build",
+    "start": "cd client && npm run preview"
+  }
 }
