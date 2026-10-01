@@ -1,0 +1,17 @@
+{
+  "name": "web-auth-presentation",
+  "version": "1.0.0",
+  "description": "5-Minute Interactive Presentation on Web Authentication Architecture",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y serve . -l 3000"
+  },
+  "keywords": [
+    "presentation",
+    "authentication",
+    "security",
+    "slides"
+  ],
+  "author": "",
+  "license": "MIT"
+}

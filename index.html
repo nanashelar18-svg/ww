@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding Web Authentication Architecture | 5-Min Presentation</title>
+  <meta name="description" content="Interactive 5-minute presentation deck on Web Authentication Architecture, secure login flows, password hashing, and session management.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="deck-container">
+    <!-- Top Navigation Bar -->
+    <header class="deck-header">
+      <div class="deck-brand">
+        <span class="brand-badge">AUTH ARCHITECTURE</span>
+        <h1 class="deck-title">Web Authentication & Secure Login Flows</h1>
+      </div>
+
+      <div class="deck-controls">
+        <!-- Presentation Timer -->
+        <div class="timer-widget" id="timerWidget">
+          <div class="timer-display" id="timerDisplay">00:00 / 05:00</div>
+          <div class="timer-progress-wrap">
+            <div class="timer-progress-bar" id="timerBar"></div>
+          </div>
+          <button class="timer-btn" id="timerToggleBtn" title="Start/Pause Timer (Key: T)">
+            <svg class="icon-play" viewBox="0 0 24 24" width="16" height="16"><polygon points="6 4 20 12 6 20" fill="currentColor"/></svg>
+            <svg class="icon-pause hidden" viewBox="0 0 24 24" width="16" height="16"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
+          </button>
+          <button class="timer-btn" id="timerResetBtn" title="Reset Timer">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <!-- Speaker Notes & Fullscreen Toggles -->
+        <button class="action-btn" id="notesToggleBtn" title="Toggle Speaker Notes (Key: S)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="currentColor"/></svg>
+          <span>Notes</span>
+        </button>
+        <button class="action-btn" id="fullscreenBtn" title="Toggle Fullscreen (Key: F)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Slides Viewport -->
+    <main class="slides-viewport">
+      <!-- SLIDE 1 -->
+      <section class="slide-section active" data-slide="1">
+        <div class="slide-grid">
+          <div class="slide-content">
+            <div class="slide-meta">
+              <span class="slide-number">SLIDE 01</span>
+              <span class="slide-time-tag">⏱️ 0:00 – 1:00</span>
+            </div>
+            <h2 class="slide-heading">The Goal of Authentication</h2>
+            <p class="slide-lead">At its core, authentication answers one critical question: <br><strong class="highlight-cyan">"Is this user who they claim to be?"</strong></p>
+
+            <div class="key-takeaways-list">
+              <div class="takeaway-card">
+                <div class="takeaway-icon">👤</div>
+                <div>
+                  <h4>Identity Verification (AuthN)</h4>
+                  <p>Validating claimed identity against an established trust baseline before granting access.</p>
+                </div>
+              </div>
+              <div class="takeaway-card">
+                <div class="takeaway-icon">🛡️</div>
+                <div>
+                  <h4>Access & Authorization (AuthZ)</h4>
+                  <p>Granting appropriate granular privileges and protecting restricted resources.</p>
+                </div>
+              </div>
+              <div class="takeaway-card">
+                <div class="takeaway-icon">🔒</div>
+                <div>
+                  <h4>Zero-Trust Security</h4>
+                  <p>Ensuring data in transit and at rest remains shielded against unauthorized interception.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 1 Visual: High-level System Diagram -->
+          <div class="slide-visual">
+            <div class="diagram-box">
+              <div class="diagram-header">
+                <span class="diagram-title">System Architecture Overview</span>
+                <span class="live-pulse"></span>
+              </div>
+
+              <div class="arch-flow">
+                <!-- User Node -->
+                <div class="node-card" id="nodeUser">
+                  <div class="node-avatar">👤</div>
+                  <div class="node-label">End User</div>
+                  <span class="node-sub">Browser / Mobile</span>
+                </div>
+
+                <div class="flow-connector">
+                  <div class="flow-line">
+                    <span class="flow-particle particle-1"></span>
+                  </div>
+                  <span class="connector-label">HTTPS Credentials</span>
+                </div>
+
+                <!-- Client App -->
+                <div class="node-card" id="nodeClient">
+                  <div class="node-avatar">💻</div>
+                  <div class="node-label">Client App</div>
+                  <span class="node-sub">Frontend SPA / UI</span>
+                </div>
+
+                <div class="flow-connector">
+                  <div class="flow-line">
+                    <span class="flow-particle particle-2"></span>
+                  </div>
+                  <span class="connector-label">REST / GraphQL</span>
+                </div>
+
+                <!-- Backend Server -->
+                <div class="node-card" id="nodeServer">
+                  <div class="node-avatar">🛡️</div>
+                  <div class="node-label">Auth Server</div>
+                  <span class="node-sub">Verification Engine</span>
+                </div>
+
+                <div class="flow-connector">
+                  <div class="flow-line">
+                    <span class="flow-particle particle-3"></span>
+                  </div>
+                  <span class="connector-label">Salt Query</span>
+                </div>
+
+                <!-- Database -->
+                <div class="node-card" id="nodeDb">
+                  <div class="node-avatar">🗄️</div>
+                  <div class="node-label">Database</div>
+                  <span class="node-sub">Hashed Records</span>
+                </div>
+              </div>
+
+              <div class="diagram-footer-note">
+                <span class="badge-accent">Core Philosophy</span>
+                <span>"Never trust the client. Verify at the server boundary."</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2 -->
+      <section class="slide-section" data-slide="2">
+        <div class="slide-grid">
+          <div class="slide-content">
+            <div class="slide-meta">
+              <span class="slide-number">SLIDE 02</span>
+              <span class="slide-time-tag">⏱️ 1:00 – 2:15</span>
+            </div>
+            <h2 class="slide-heading">The Client-Side Flow</h2>
+            <p class="slide-lead">What happens before credentials touch the wire: collection, validation, and encryption.</p>
+
+            <div class="step-breakdown">
+              <div class="step-item">
+                <span class="step-num">01</span>
+                <div>
+                  <h4>Input Collection</h4>
+                  <p>Captures credentials (email/username & secret password) via semantic, accessible form elements.</p>
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-num">02</span>
+                <div>
+                  <h4>Client-Side Validation</h4>
+                  <p>Instant UX feedback (regex format checks, empty fields). Prevents needless network overhead.</p>
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-num">03</span>
+                <div>
+                  <h4>Secure Transmission (TLS/SSL)</h4>
+                  <p>Payload is wrapped in TLS encryption. Protects against packet sniffing & Man-In-The-Middle (MITM).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2 Visual: Interactive Mock Login & Transport Inspector -->
+          <div class="slide-visual">
+            <div class="mock-browser">
+              <div class="browser-bar">
+                <div class="browser-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="browser-address">
+                  <svg viewBox="0 0 24 24" width="14" height="14" class="lock-icon"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="currentColor"/></svg>
+                  <span>https://secure.app.io/login</span>
+                </div>
+                <span class="tls-status">TLS 1.3 Active</span>
+              </div>
+
+              <div class="mock-login-body">
+                <form id="demoLoginForm" onsubmit="event.preventDefault(); window.simulateClientAuth();">
+                  <div class="form-group">
+                    <label for="demoEmail">Email Address</label>
+                    <input type="email" id="demoEmail" value="alex.dev@company.com" placeholder="name@domain.com">
+                    <span class="field-feedback" id="emailFeedback">Valid email format ✓</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="demoPassword">Master Password</label>
+                    <div class="password-input-wrap">
+                      <input type="password" id="demoPassword" value="UltraSecure#2026!" placeholder="••••••••••••">
+                      <button type="button" class="peek-btn" id="peekPasswordBtn">👁️</button>
+                    </div>
+                    <span class="field-feedback" id="passwordFeedback">Strong password criteria met ✓</span>
+                  </div>
+                  <button type="submit" class="submit-btn" id="submitDemoBtn">
+                    <span>Submit & Encrypt Payload</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                  </button>
+                </form>
+
+                <div class="wire-payload" id="wirePayload">
+                  <div class="payload-header">
+                    <span>NETWORK PACKET (TLS ENCRYPTED)</span>
+                    <span class="protocol-tag">POST /api/v1/auth/login</span>
+                  </div>
+                  <pre><code id="payloadCode"># Plaintext in transit: NONE (TLS 1.3 AES-GCM-256)
+# Encrypted wire preview:
+0x8F 0xC2 0x9A 0x33 0xEE 0x77 0x1B 0x8C ...
+[Data encrypted before hitting ISP or Wi-Fi airwaves]</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3 -->
+      <section class="slide-section" data-slide="3">
+        <div class="slide-grid">
+          <div class="slide-content">
+            <div class="slide-meta">
+              <span class="slide-number">SLIDE 03</span>
+              <span class="slide-time-tag">⏱️ 2:15 – 3:30</span>
+            </div>
+            <h2 class="slide-heading">Server-Side Processing</h2>
+            <p class="slide-lead">Where verification happens: credential lookup, cryptographic hashing, and session creation.</p>
+
+            <div class="process-steps">
+              <div class="p-card">
+                <div class="p-icon">🔍</div>
+                <div>
+                  <h4>1. Credential Lookup</h4>
+                  <p>Database queries the user record by unique identifier (email/username).</p>
+                </div>
+              </div>
+              <div class="p-card highlight-border">
+                <div class="p-icon">⚙️</div>
+                <div>
+                  <h4>2. Slow Salted Hashing</h4>
+                  <p>Passwords are <strong>never stored plaintext</strong>. Compared using slow algorithms: <code>bcrypt</code>, <code>Argon2id</code>, or <code>PBKDF2</code>.</p>
+                </div>
+              </div>
+              <div class="p-card">
+                <div class="p-icon">🎟️</div>
+                <div>
+                  <h4>3. Session Token Issuance</h4>
+                  <p>On match: issue <strong>Session Cookie</strong> (stateful DB/Redis) or <strong>JWT</strong> (stateless signed claims).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 3 Visual: Interactive Hash & Token Inspector -->
+          <div class="slide-visual">
+            <div class="tech-box">
+              <div class="tech-box-header">
+                <span class="tab-btn" data-tab="hash">🔒 Password Hashing</span>
+                <span class="tab-btn active" data-tab="jwt">⚡ Live JWT Playground</span>
+                <span class="tab-btn" data-tab="token">⚖️ Session vs JWT</span>
+              </div>
+
+              <!-- Tab 1: Hash Demo -->
+              <div class="tab-pane" id="tabHash">
+                <div class="hash-demo-box">
+                  <div class="hash-row">
+                    <span class="hash-lbl">Raw Password:</span>
+                    <input type="text" id="hashInputPass" value="UltraSecure#2026!" class="hash-input">
+                  </div>
+                  <div class="hash-row">
+                    <span class="hash-lbl">Cryptographic Salt:</span>
+                    <code class="code-salt" id="saltDisplay">$2b$12$e8xL...r9qK2wZ!</code>
+                  </div>
+                  <div class="hash-row">
+                    <span class="hash-lbl">Algorithm:</span>
+                    <span class="badge-algo">Argon2id / bcrypt (Cost: 12)</span>
+                  </div>
+                  <div class="hash-result-box">
+                    <div class="result-title">STORED HASH (DATABASE):</div>
+                    <code class="hash-output" id="hashOutput">$2b$12$e8xLr9qK2wZ01nMuP...wT4yQ9e1s8dF2G4hJ7</code>
+                    <p class="salt-explanation">💡 Even identical passwords produce totally different hashes because of unique random salts per user!</p>
+                  </div>
+                  <button class="action-calc-btn" onclick="window.recomputeDemoHash()">⚡ Regenerate Salt & Hash</button>
+                </div>
+              </div>
+
+              <!-- Tab 2: Live JWT Playground -->
+              <div class="tab-pane active" id="tabJwt">
+                <div class="jwt-playground-box">
+                  <div class="jwt-encoded-display">
+                    <div class="jwt-encoded-label">
+                      <span>ENCODED TOKEN (HEADER . PAYLOAD . SIGNATURE)</span>
+                      <span class="jwt-status-badge valid" id="jwtStatusBadge">VERIFIED ✓</span>
+                    </div>
+                    <div class="jwt-token-string" id="jwtTokenDisplay">
+                      <span class="jwt-part-header" id="jwtEncHeader">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span class="jwt-part-payload" id="jwtEncPayload">eyJzdWIiOiIxMjM0NTYiLCJuYW1lIjoiQWxleCBEZXYiLCJyb2xlIjoidXNlciIsImlhdCI6MTczMDAwMDAwMH0</span>.<span class="jwt-part-sig" id="jwtEncSig">4zN9Z8m_2kXqLpWvYz9B7T1</span>
+                    </div>
+                  </div>
+
+                  <div class="jwt-editor-columns">
+                    <!-- Header editor -->
+                    <div class="jwt-col">
+                      <div class="col-head red-text">HEADER (Algorithm & Type)</div>
+                      <textarea id="jwtHeaderInput" class="jwt-code-input" rows="4">{\n  "alg": "HS256",\n  "typ": "JWT"\n}</textarea>
+                    </div>
+
+                    <!-- Payload editor -->
+                    <div class="jwt-col">
+                      <div class="col-head purple-text">PAYLOAD (User Claims & Roles)</div>
+                      <textarea id="jwtPayloadInput" class="jwt-code-input" rows="4">{\n  "sub": "user_49182",\n  "name": "Alex Dev",\n  "role": "user",\n  "exp": 1730003600\n}</textarea>
+                    </div>
+                  </div>
+
+                  <div class="jwt-secret-row">
+                    <div class="secret-input-wrap">
+                      <span class="secret-label">HMAC-SHA256 SECRET:</span>
+                      <input type="text" id="jwtSecretInput" value="super-secret-key-32-chars-long" class="secret-input">
+                    </div>
+                    <button class="tamper-btn" id="tamperTestBtn" onclick="window.testJwtTampering()">
+                      ⚠️ Test Tampering (Escalate to Admin)
+                    </button>
+                  </div>
+
+                  <div class="jwt-tamper-alert" id="jwtTamperAlert">
+                    <span>🛡️ Cryptographic Integrity Active: Any unauthorized modification to payload invalidates the signature without server key!</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Session vs JWT -->
+              <div class="tab-pane" id="tabToken">
+                <div class="compare-grid">
+                  <div class="compare-card">
+                    <h4>🍪 Stateful Session</h4>
+                    <ul>
+                      <li>Session ID in DB / Redis</li>
+                      <li>Easy instant revocation</li>
+                      <li>High memory footprint at scale</li>
+                      <li>Requires centralized store</li>
+                    </ul>
+                    <div class="tag-status">Best for monoliths & tight control</div>
+                  </div>
+                  <div class="compare-card">
+                    <h4>🎟️ Stateless JWT</h4>
+                    <ul>
+                      <li>Self-contained signed claims</li>
+                      <li>Scales across microservices</li>
+                      <li>Revocation requires blacklist/short expiry</li>
+                      <li>Cannot be altered without key</li>
+                    </ul>
+                    <div class="tag-status">Best for distributed architectures</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4 -->
+      <section class="slide-section" data-slide="4">
+        <div class="slide-grid">
+          <div class="slide-content">
+            <div class="slide-meta">
+              <span class="slide-number">SLIDE 04</span>
+              <span class="slide-time-tag">⏱️ 3:30 – 4:15</span>
+            </div>
+            <h2 class="slide-heading">Session Persistence & Security</h2>
+            <p class="slide-lead">Hardening token storage, mitigating XSS & CSRF, and managing the token lifecycle.</p>
+
+            <div class="security-pillars-list">
+              <div class="sec-item">
+                <div class="sec-header">
+                  <span class="sec-badge">COOKIE FLAG</span>
+                  <code>HttpOnly</code>
+                </div>
+                <p>Prevents JavaScript from reading the cookie via <code>document.cookie</code>. Direct mitigation against XSS credential theft.</p>
+              </div>
+
+              <div class="sec-item">
+                <div class="sec-header">
+                  <span class="sec-badge">COOKIE FLAG</span>
+                  <code>Secure; SameSite=Strict</code>
+                </div>
+                <p>Ensures cookies only transmit over encrypted HTTPS, and stops unauthorized cross-site requests (CSRF mitigation).</p>
+              </div>
+
+              <div class="sec-item">
+                <div class="sec-header">
+                  <span class="sec-badge">LIFECYCLE</span>
+                  <span>Short-Lived Access + Refresh Tokens</span>
+                </div>
+                <p>15-minute access tokens minimize exposure windows. Rotating refresh tokens enable frictionless renewal.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 4 Visual: Interactive Shield & Cookie Flags -->
+          <div class="slide-visual">
+            <div class="shield-container">
+              <div class="shield-header">
+                <span>🛡️ Threat Neutralization Matrix</span>
+                <span class="badge-live">Live Defense Demo</span>
+              </div>
+
+              <div class="defense-cards">
+                <div class="defense-row">
+                  <div class="threat-col">
+                    <span class="threat-tag">THREAT: XSS Script Injection</span>
+                    <code>malicious_script.js -> document.cookie</code>
+                  </div>
+                  <div class="shield-col">
+                    <span class="shield-tag success">DEFENSE: HttpOnly</span>
+                    <p>Browser blocks JS API access completely</p>
+                  </div>
+                </div>
+
+                <div class="defense-row">
+                  <div class="threat-col">
+                    <span class="threat-tag">THREAT: CSRF Forgery Attack</span>
+                    <code>evil-site.com -> POST /api/transfer</code>
+                  </div>
+                  <div class="shield-col">
+                    <span class="shield-tag success">DEFENSE: SameSite=Strict</span>
+                    <p>Browser suppresses auth cookie on cross-site call</p>
+                  </div>
+                </div>
+
+                <div class="defense-row">
+                  <div class="threat-col">
+                    <span class="threat-tag">THREAT: Token Theft / Replay</span>
+                    <code>Stolen long-lived session key</code>
+                  </div>
+                  <div class="shield-col">
+                    <span class="shield-tag success">DEFENSE: 15-min Expire + Rotation</span>
+                    <p>Token expires quickly; refresh token rotated on use</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cookie-header-preview">
+                <span class="preview-title">PROD HTTP RESPONSE HEADER:</span>
+                <code>Set-Cookie: auth_token=jwt_xyz; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=900</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5 -->
+      <section class="slide-section" data-slide="5">
+        <div class="slide-grid">
+          <div class="slide-content">
+            <div class="slide-meta">
+              <span class="slide-number">SLIDE 05</span>
+              <span class="slide-time-tag">⏱️ 4:15 – 5:00</span>
+            </div>
+            <h2 class="slide-heading">Summary & Key Takeaways</h2>
+            <p class="slide-lead">A robust, resilient web authentication architecture rests upon three core pillars.</p>
+
+            <div class="pillars-summary-grid">
+              <div class="pillar-box">
+                <div class="pillar-icon">🔒</div>
+                <h3>1. Encrypted Transport</h3>
+                <p>Enforce HTTPS/TLS everywhere. Protect passwords, tokens, and payloads from in-transit snooping.</p>
+              </div>
+
+              <div class="pillar-box">
+                <div class="pillar-icon">🛡️</div>
+                <h3>2. Salted Slow Hashing</h3>
+                <p>Never plaintext. Always use modern, adaptive algorithms (Argon2id, bcrypt) with unique random salts.</p>
+              </div>
+
+              <div class="pillar-box">
+                <div class="pillar-icon">🔑</div>
+                <h3>3. Hardened Sessions</h3>
+                <p>HttpOnly + Secure + SameSite cookies, short-lived tokens, and automated refresh rotation.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 5 Visual: Q&A Spotlight & Modern Trends -->
+          <div class="slide-visual">
+            <div class="qa-container">
+              <div class="qa-badge">NOW OPEN FOR QUESTIONS</div>
+              <h3 class="qa-title">Thank You! Any Questions?</h3>
+              <p class="qa-subtitle">Great topics to explore during Q&A:</p>
+
+              <div class="qa-chips">
+                <button class="qa-chip" onclick="window.selectQaTopic(this, 'Passkeys & WebAuthn eliminate passwords entirely through public-key cryptography and device biometrics.')">
+                  🔐 What about Passkeys / WebAuthn?
+                </button>
+                <button class="qa-chip" onclick="window.selectQaTopic(this, 'OAuth 2.0 handles authorization delegation, while OIDC (OpenID Connect) provides identity authentication on top.')">
+                  🌐 OAuth 2.0 vs OpenID Connect (OIDC)?
+                </button>
+                <button class="qa-chip" onclick="window.selectQaTopic(this, 'Store refresh tokens in HttpOnly cookies, maintain a family ID, and immediately invalidate all tokens if a reused refresh token is detected.')">
+                  🔄 Refresh Token Rotation & Theft Detection?
+                </button>
+                <button class="qa-chip" onclick="window.selectQaTopic(this, 'Multi-Factor Authentication (TOTP, FIDO2 hardware keys, SMS fallbacks) adds an essential secondary barrier.')">
+                  📱 Multi-Factor Authentication (MFA)?
+                </button>
+              </div>
+
+              <div class="qa-response-box" id="qaResponseBox">
+                <span class="qa-tip-label">SPEAKER TIP FOR Q&A:</span>
+                <p id="qaAnswerText">Click any question chip above to reveal instant talking points for the audience!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Presentation Bar: Slide Navigation & Progress -->
+    <footer class="deck-footer">
+      <div class="slide-nav-left">
+        <button class="nav-btn" id="prevSlideBtn" title="Previous Slide (← / PageUp)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          <span>Prev</span>
+        </button>
+        <button class="nav-btn" id="nextSlideBtn" title="Next Slide (→ / Space / PageDown)">
+          <span>Next</span>
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        </button>
+      </div>
+
+      <!-- Slide Indicator Dots -->
+      <div class="slide-dots" id="slideDots">
+        <button class="dot-btn active" data-go="1" title="Slide 1: Introduction">1</button>
+        <button class="dot-btn" data-go="2" title="Slide 2: Client-Side Flow">2</button>
+        <button class="dot-btn" data-go="3" title="Slide 3: Server Processing">3</button>
+        <button class="dot-btn" data-go="4" title="Slide 4: Session Security">4</button>
+        <button class="dot-btn" data-go="5" title="Slide 5: Summary & Q&A">5</button>
+      </div>
+
+      <div class="slide-nav-right">
+        <span class="current-slide-label" id="slideIndicator">Slide 1 of 5</span>
+      </div>
+    </footer>
+
+    <!-- Expandable Speaker Notes Drawer -->
+    <aside class="speaker-notes-drawer" id="speakerNotesDrawer">
+      <div class="drawer-header">
+        <div class="drawer-title-wrap">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/></svg>
+          <h3>Speaker Script & Pacing Cues</h3>
+          <span class="notes-slide-target" id="notesSlideTarget">Slide 1</span>
+        </div>
+        <button class="drawer-close-btn" id="notesCloseBtn" title="Close Notes Drawer">✕</button>
+      </div>
+      <div class="drawer-body">
+        <div class="script-pacing" id="scriptPacing">Pacing: 0:00 – 1:00 (Target: 60s)</div>
+        <blockquote class="speaker-verbatim" id="speakerVerbatim">
+          "Hello everyone. Today, we're going to break down how web applications handle one of their most critical functions: user authentication..."
+        </blockquote>
+        <div class="speaker-coaching" id="speakerCoaching">
+          <strong>Coach's Tip:</strong> Make strong eye contact during the core question. Emphasize the distinction between AuthN and AuthZ early on.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
