@@ -30,9 +30,23 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickLogin = (demoEmail) => {
+  const handleQuickLogin = async (demoEmail) => {
     setEmail(demoEmail);
     setPassword('password123');
+    setError('');
+    setLoading(true);
+    try {
+      const res = await login(demoEmail, 'password123');
+      if (res.success) {
+        navigate('/');
+      } else {
+        setError(res.message || 'Authentication failed');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Login error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const demoPersonas = [

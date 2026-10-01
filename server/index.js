@@ -19,22 +19,31 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/tickets', ticketRoutes);
-app.use('/api/docs', docRoutes);
-app.use('/api/workflows', workflowRoutes);
-app.use('/api/insights', insightRoutes);
+// Routes - Support both /api/* and root paths for serverless function rewrites
+const apiRoutes = [
+  ['/auth', authRoutes],
+  ['/tickets', ticketRoutes],
+  ['/docs', docRoutes],
+  ['/workflows', workflowRoutes],
+  ['/insights', insightRoutes]
+];
+
+apiRoutes.forEach(([routePath, router]) => {
+  app.use(`/api${routePath}`, router);
+  app.use(routePath, router);
+});
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+const handleHealth = (req, res) => {
   res.json({
     status: 'HEALTHY',
     service: 'NexusAI Enterprise Backend',
     timestamp: new Date().toISOString(),
     aiEngine: process.env.GEMINI_API_KEY ? 'Google Gemini 1.5 Flash (Active)' : 'NexusAI Contextual Heuristics (Ready)'
   });
-});
+};
+app.get('/api/health', handleHealth);
+app.get('/health', handleHealth);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
